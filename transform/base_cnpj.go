@@ -7,7 +7,7 @@ import (
 )
 
 func addBaseCPNJ(srcDir, outDir string, l *lookups) error {
-	s, err := newSource(base_cpnj, srcDir)
+	s, err := newSource(baseCNPJ, srcDir)
 	if err != nil {
 		return fmt.Errorf("error creating source for partners: %w", err)
 	}
