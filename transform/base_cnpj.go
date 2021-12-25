@@ -3,6 +3,7 @@ package transform
 import (
 	"fmt"
 	"io"
+	"log"
 	"path/filepath"
 )
 
@@ -29,11 +30,10 @@ func addBaseCPNJ(srcDir, outDir string, l *lookups) error {
 			if err != nil {
 				return fmt.Errorf("error in the glob pattern: %w", err)
 			}
-			/*
-				if len(ls) == 0 {
-					return fmt.Errorf("No JSON file found for CNPJ base %s", t[0])
-				}
-			*/
+			if len(ls) == 0 {
+				log.Output(2, fmt.Sprintf("No JSON file found for CNPJ base %s", r[0]))
+				continue
+			}
 			for _, f := range ls {
 				c, err := companyFromJSON(f)
 				if err != nil {
