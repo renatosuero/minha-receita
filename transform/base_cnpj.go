@@ -13,18 +13,18 @@ func addBaseCPNJ(srcDir, outDir string, l *lookups) error {
 		return fmt.Errorf("error creating source for partners: %w", err)
 	}
 	defer s.close()
-	for _, r := range s.readers {
+	for _, a := range s.readers {
 		for {
-			t, err := r.read()
+			r, err := a.read()
 			if err == io.EOF {
 				break
 			}
 			if err != nil {
 				break // do not proceed in case of errors.
 			}
-			b, err := pathForBaseCNPJ(t[0])
+			b, err := pathForBaseCNPJ(r[0])
 			if err != nil {
-				return fmt.Errorf("error getting the path for %s: %w", t[0], err)
+				return fmt.Errorf("error getting the path for %s: %w", r[0], err)
 			}
 			ls, err := filepath.Glob(filepath.Join(outDir, b, "*.json"))
 			if err != nil {
@@ -39,7 +39,7 @@ func addBaseCPNJ(srcDir, outDir string, l *lookups) error {
 				if err != nil {
 					return fmt.Errorf("error reading company from %s: %w", f, err)
 				}
-				err = c.fillMain(t, l)
+				err = c.baseCNPJ(r, l)
 				if err != nil {
 					return fmt.Errorf("error filling company from %s: %w", f, err)
 				}
@@ -53,30 +53,30 @@ func addBaseCPNJ(srcDir, outDir string, l *lookups) error {
 	return nil
 }
 
-func (c *company) fillMain(data []string, l *lookups) error {
-	c.RazaoSocial = data[1]
-	codigoNaturezaJuridica, err := toInt(data[2])
+func (c *company) baseCNPJ(r []string, l *lookups) error {
+	c.RazaoSocial = r[1]
+	codigoNaturezaJuridica, err := toInt(r[2])
 	if err != nil {
-		return fmt.Errorf("error trying to parse CodigoNaturezaJuridica %s: %w", data[2], err)
+		return fmt.Errorf("error trying to parse CodigoNaturezaJuridica %s: %w", r[2], err)
 	}
 	c.CodigoNaturezaJuridica = codigoNaturezaJuridica
-	qualificacaoDoResponsavel, err := toInt(data[3])
+	qualificacaoDoResponsavel, err := toInt(r[3])
 	if err != nil {
-		return fmt.Errorf("error trying to parse QualificacaoDoResponsavel %s: %w", data[2], err)
+		return fmt.Errorf("error trying to parse QualificacaoDoResponsavel %s: %w", r[3], err)
 	}
 	c.QualificacaoDoResponsavel = qualificacaoDoResponsavel
-	capitalSocial, err := toFloat(data[4])
+	capitalSocial, err := toFloat(r[4])
 	if err != nil {
-		return fmt.Errorf("error trying to parse CapitalSocial %s: %w", data[2], err)
+		return fmt.Errorf("error trying to parse CapitalSocial %s: %w", r[4], err)
 	}
 	c.CapitalSocial = capitalSocial
-	err = c.porte(data[5])
+	err = c.porte(r[5])
 	if err != nil {
-		return fmt.Errorf("error trying to parse Porte %s: %w", data[5], err)
+		return fmt.Errorf("error trying to parse Porte %s: %w", r[5], err)
 	}
-	enteFederativoResponsavel, err := toInt(data[6])
+	enteFederativoResponsavel, err := toInt(r[6])
 	if err != nil {
-		return fmt.Errorf("error trying to parse EnteFederativoResponsavel%s: %w", data[2], err)
+		return fmt.Errorf("error trying to parse EnteFederativoResponsavel%s: %w", r[6], err)
 	}
 	c.EnteFederativoResponsavel = enteFederativoResponsavel
 	natures := l.natures[*c.CodigoNaturezaJuridica]
